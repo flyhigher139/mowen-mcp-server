@@ -24,6 +24,8 @@ profile.cov
 go.work
 go.work.sum
 
+.idea
+.vscode
 # env file
 .env
 
