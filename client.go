@@ -11,9 +11,9 @@ import (
 )
 
 const (
-	// 墨问API基础URL
-	MowenAPIBaseURL = "https://api.mowen.cn"
-	// API端点
+	// MowenAPIBaseURL 墨问API基础URL
+	MowenAPIBaseURL = "https://open.mowen.cn"
+	// NoteCreateEndpoint API端点
 	NoteCreateEndpoint = "/api/open/api/v1/note/create"
 	NoteEditEndpoint   = "/api/open/api/v1/note/edit"
 	NoteSetEndpoint    = "/api/open/api/v1/note/set"
