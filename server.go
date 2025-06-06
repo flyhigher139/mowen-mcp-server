@@ -26,10 +26,8 @@ func NewMowenMCPServer() (*MowenMCPServer, error) {
 	}
 
 	// 创建SSE传输服务器
-	transportServer, err := transport.NewSSEServerTransport("127.0.0.1:8080")
-	if err != nil {
-		return nil, fmt.Errorf("failed to create transport server: %w", err)
-	}
+	//transportServer, err := transport.NewSSEServerTransport("127.0.0.1:8080")
+	transportServer := transport.NewStreamableHTTPServerTransport("127.0.0.1:8080")
 
 	// 创建MCP服务器
 	mcpServer, err := server.NewServer(transportServer)
@@ -249,8 +247,8 @@ func (s *MowenMCPServer) handleResetAPIKey(ctx context.Context, req *protocol.Ca
 // Run 启动MCP服务器
 func (s *MowenMCPServer) Run() error {
 	log.Println("启动墨问MCP服务器...")
-	log.Println("服务器地址: http://127.0.0.1:8080")
-	log.Println("SSE端点: http://127.0.0.1:8080/sse")
+	//log.Println("服务器地址: http://127.0.0.1:8080")
+	//log.Println("SSE端点: http://127.0.0.1:8080/sse")
 	return s.mcpServer.Run()
 }
 
