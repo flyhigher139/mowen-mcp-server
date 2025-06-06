@@ -52,9 +52,12 @@ MOWEN_API_KEY=你的墨问API密钥
 ```
 
 4. **运行服务器**：
+找到适配你的操作系统和架构的可执行文件（如`mowen-mcp-darwin-arm64`），并运行：
 ```bash
-go run .
+./mowen-mcp-darwin-arm64
 ```
+
+Windows 系统直接双击 `exe文件` 运行即可
 
 服务器将在 `http://127.0.0.1:8080` 启动，SSE端点为 `http://127.0.0.1:8080/sse`。
 
@@ -65,19 +68,12 @@ go run .
 ```json
 {
   "mcpServers": {
-    "mowen-mcp-server": {
-      "command": "go",
-      "args": ["run", "."],
-      "cwd": "/path/to/mowen-v1",
-      "env": {
-        "MOWEN_API_KEY": "${env:MOWEN_API_KEY}"
-      }
+    "墨问 MCP": {
+      "url": "http://127.0.0.1:8080/sse"
     }
   }
 }
 ```
-
-**注意**: 请将 `/path/to/mowen-v1` 替换为你的实际项目路径。
 
 ## 🛠️ 可用工具
 
@@ -205,7 +201,7 @@ mowen-v1/
 
 ## 📄 许可证
 
-本项目采用 MIT 许可证。
+本项目采用  Apache-2.0 许可证。
 
 ## 🙏 致谢
 
