@@ -17,7 +17,8 @@ type MowenMCPServer struct {
 	mowenClient *MowenClient
 }
 
-// NewMowenMCPServer 创建新的墨问MCP服务器
+// NewMowenMCPServer 创建并初始化一个新的墨问MCP服务器。
+// 它会创建墨问API客户端，设置传输层，并注册所有MCP工具。
 func NewMowenMCPServer() (*MowenMCPServer, error) {
 	// 创建墨问API客户端
 	mowenClient, err := NewMowenClient()
@@ -48,7 +49,8 @@ func NewMowenMCPServer() (*MowenMCPServer, error) {
 	return mowenMCPServer, nil
 }
 
-// registerTools 注册所有MCP工具
+// registerTools 注册所有墨问MCP服务器支持的工具。
+// 这些工具包括创建笔记、编辑笔记、设置笔记隐私、重置API密钥和文件上传。
 func (s *MowenMCPServer) registerTools() error {
 	// 注册创建笔记工具
 	createNoteTool, err := protocol.NewTool(
@@ -94,10 +96,33 @@ func (s *MowenMCPServer) registerTools() error {
 	}
 	s.mcpServer.RegisterTool(resetKeyTool, s.handleResetAPIKey)
 
+	// 注册本地文件上传工具
+	uploadFileTool, err := protocol.NewTool(
+		"upload_file",
+		"上传本地文件到墨问笔记，支持图片、音频和PDF",
+		UploadFileArgs{},
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create upload_file tool: %w", err)
+	}
+	s.mcpServer.RegisterTool(uploadFileTool, s.handleUploadFile)
+
+	// 注册基于URL的文件上传工具
+	uploadFileViaURLTool, err := protocol.NewTool(
+		"upload_file_via_url",
+		"通过URL上传文件到墨问笔记，支持图片、音频和PDF",
+		UploadFileViaURLArgs{},
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create upload_file_via_url tool: %w", err)
+	}
+	s.mcpServer.RegisterTool(uploadFileViaURLTool, s.handleUploadFileViaURL)
+
 	return nil
 }
 
-// handleCreateNote 处理创建笔记请求
+// handleCreateNote 处理创建笔记的MCP工具请求。
+// 它解析请求参数，将其转换为墨问API所需的格式，然后调用墨问API创建笔记。
 func (s *MowenMCPServer) handleCreateNote(ctx context.Context, req *protocol.CallToolRequest) (*protocol.CallToolResult, error) {
 	var args CreateNoteArgs
 	if err := protocol.VerifyAndUnmarshal(req.RawArguments, &args); err != nil {
@@ -133,7 +158,8 @@ func (s *MowenMCPServer) handleCreateNote(ctx context.Context, req *protocol.Cal
 	}, nil
 }
 
-// handleEditNote 处理编辑笔记请求
+// handleEditNote 处理编辑笔记的MCP工具请求。
+// 它解析请求参数，将其转换为墨问API所需的格式，然后调用墨问API编辑笔记。
 func (s *MowenMCPServer) handleEditNote(ctx context.Context, req *protocol.CallToolRequest) (*protocol.CallToolResult, error) {
 	var args EditNoteArgs
 	if err := protocol.VerifyAndUnmarshal(req.RawArguments, &args); err != nil {
@@ -166,7 +192,8 @@ func (s *MowenMCPServer) handleEditNote(ctx context.Context, req *protocol.CallT
 	}, nil
 }
 
-// handleSetNotePrivacy 处理设置笔记隐私请求
+// handleSetNotePrivacy 处理设置笔记隐私的MCP工具请求。
+// 它解析请求参数，构建隐私设置，然后调用墨问API更新笔记的隐私设置。
 func (s *MowenMCPServer) handleSetNotePrivacy(ctx context.Context, req *protocol.CallToolRequest) (*protocol.CallToolResult, error) {
 	var args SetNotePrivacyArgs
 	if err := protocol.VerifyAndUnmarshal(req.RawArguments, &args); err != nil {
@@ -218,7 +245,8 @@ func (s *MowenMCPServer) handleSetNotePrivacy(ctx context.Context, req *protocol
 	}, nil
 }
 
-// handleResetAPIKey 处理重置API密钥请求
+// handleResetAPIKey 处理重置API密钥的MCP工具请求。
+// 它调用墨问API重置API密钥。
 func (s *MowenMCPServer) handleResetAPIKey(ctx context.Context, req *protocol.CallToolRequest) (*protocol.CallToolResult, error) {
 	var args ResetAPIKeyArgs
 	if err := protocol.VerifyAndUnmarshal(req.RawArguments, &args); err != nil {
@@ -244,7 +272,60 @@ func (s *MowenMCPServer) handleResetAPIKey(ctx context.Context, req *protocol.Ca
 	}, nil
 }
 
-// Run 启动MCP服务器
+// handleUploadFile 处理文件上传的MCP工具请求。
+// 它解析请求参数，然后调用墨问API上传文件。
+func (s *MowenMCPServer) handleUploadFile(ctx context.Context, req *protocol.CallToolRequest) (*protocol.CallToolResult, error) {
+	var args UploadFileArgs
+	if err := protocol.VerifyAndUnmarshal(req.RawArguments, &args); err != nil {
+		return nil, fmt.Errorf("invalid arguments: %v", err)
+	}
+
+	// 调用墨问API上传文件
+	result, err := s.mowenClient.UploadFile(args.FilePath, args.FileType, args.FileName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to upload file: %w", err)
+	}
+
+	// 格式化响应
+	responseText := fmt.Sprintf("文件上传成功！\n\n响应详情：\n%+v", result)
+
+	return &protocol.CallToolResult{
+		Content: []protocol.Content{
+			&protocol.TextContent{
+				Type: "text",
+				Text: responseText,
+			},
+		},
+	}, nil
+}
+
+// handleUploadFileViaURL 处理基于URL的文件上传请求
+func (s *MowenMCPServer) handleUploadFileViaURL(ctx context.Context, req *protocol.CallToolRequest) (*protocol.CallToolResult, error) {
+	var args UploadFileViaURLArgs
+	if err := protocol.VerifyAndUnmarshal(req.RawArguments, &args); err != nil {
+		return nil, fmt.Errorf("invalid arguments: %v", err)
+	}
+
+	// 调用墨问API通过URL上传文件
+	result, err := s.mowenClient.UploadFileViaURL(args.FileURL, args.FileType, args.FileName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to upload file via URL: %w", err)
+	}
+
+	// 格式化响应
+	responseText := fmt.Sprintf("文件通过URL上传成功！\n\n响应详情：\n%+v", result)
+
+	return &protocol.CallToolResult{
+		Content: []protocol.Content{
+			&protocol.TextContent{
+				Type: "text",
+				Text: responseText,
+			},
+		},
+	}, nil
+}
+
+// Run 启动墨问MCP服务器，开始监听传入的MCP请求。
 func (s *MowenMCPServer) Run() error {
 	log.Println("启动墨问MCP服务器...")
 	//log.Println("服务器地址: http://127.0.0.1:8080")
@@ -252,7 +333,8 @@ func (s *MowenMCPServer) Run() error {
 	return s.mcpServer.Run()
 }
 
-// Shutdown 关闭MCP服务器
+// Shutdown 关闭墨问MCP服务器。
+// 它会优雅地关闭底层的MCP服务器。
 func (s *MowenMCPServer) Shutdown(ctx context.Context) error {
 	return s.mcpServer.Shutdown(ctx)
 }

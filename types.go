@@ -78,13 +78,37 @@ type SetNotePrivacyArgs struct {
 }
 
 // ResetAPIKeyArgs 重置API密钥工具参数
-type ResetAPIKeyArgs struct{}
+type ResetAPIKeyArgs struct {
+}
+
+// UploadFileArgs 本地文件上传参数
+type UploadFileArgs struct {
+	FilePath string `json:"file_path" description:"要上传的文件路径"`
+	FileType int    `json:"file_type" description:"文件类型：1-图片，2-音频，3-PDF"`
+	FileName string `json:"file_name" description:"文件名称"`
+}
+
+// UploadFileViaURLArgs 基于URL的文件上传参数
+type UploadFileViaURLArgs struct {
+	FileURL  string `json:"file_url" description:"要上传的文件URL"`
+	FileType int    `json:"file_type" description:"文件类型：1-图片，2-音频，3-PDF"`
+	FileName string `json:"file_name,omitempty" description:"文件名称（可选）"`
+}
+
+// FileNode 文件节点
+type FileNode struct {
+	FileType   string            `json:"file_type" description:"文件类型：image、audio、pdf"`
+	SourceType string            `json:"source_type" description:"来源类型：local、url"`
+	SourcePath string            `json:"source_path" description:"文件路径或URL"`
+	Metadata   map[string]string `json:"metadata,omitempty" description:"文件元数据"`
+}
 
 // Paragraph 段落结构
 type Paragraph struct {
-	Type   string     `json:"type,omitempty" description:"段落类型：quote（引用段落）、note（内链笔记）"`
+	Type   string     `json:"type,omitempty" description:"段落类型：quote（引用段落）、note（内链笔记）、file（文件）"`
 	Texts  []TextNode `json:"texts,omitempty" description:"文本节点列表"`
 	NoteID string     `json:"note_id,omitempty" description:"内链笔记ID（仅当type为note时使用）"`
+	File   *FileNode  `json:"file,omitempty" description:"文件节点（仅当type为file时使用）"`
 }
 
 // TextNode 文本节点
@@ -119,18 +143,28 @@ func ConvertParagraphsToNoteAtom(paragraphs []Paragraph) NoteAtom {
 		case "note":
 			// 内链笔记
 			notePara := NoteAtom{
-				Type: "paragraph",
-				Content: []NoteAtom{
-					{
-						Type: "text",
-						Text: "@note",
-						Attrs: map[string]string{
-							"note_id": para.NoteID,
-						},
-					},
+				Type: "note",
+				Attrs: map[string]string{
+					"uuid": para.NoteID,
 				},
 			}
 			doc.Content = append(doc.Content, notePara)
+		case "file":
+			// 文件段落
+			if para.File != nil {
+				fileAtom := NoteAtom{
+					Type: para.File.FileType,
+					Attrs: map[string]string{
+						"uuid":       para.File.SourcePath, // 墨问API中文件UUID即为SourcePath
+						"sourceType": para.File.SourceType,
+					},
+				}
+				// 合并元数据
+				for k, v := range para.File.Metadata {
+					fileAtom.Attrs[k] = v
+				}
+				doc.Content = append(doc.Content, fileAtom)
+			}
 		default:
 			// 普通段落
 			normalPara := NoteAtom{

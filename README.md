@@ -147,12 +147,18 @@ Windows 系统直接双击 `exe文件` 运行即可
 
 ```
 mowen-v1/
-├── main.go          # 主程序入口
-├── server.go        # MCP服务器实现
-├── client.go        # 墨问API客户端
-├── types.go         # 数据结构定义
-├── go.mod           # Go模块定义
-└── README.md        # 项目文档
+├── main.go              # 主程序入口
+├── server.go            # MCP服务器实现
+├── client.go            # 墨问API客户端
+├── types.go             # 数据结构定义
+├── client_test.go       # 客户端单元测试
+├── server_test.go       # 服务器单元测试
+├── types_test.go        # 类型转换测试
+├── mock_test.go         # 模拟测试
+├── integration_test.go  # 集成测试
+├── go.mod               # Go模块定义
+├── go.sum               # 依赖校验文件
+└── README.md            # 项目文档
 ```
 
 ## 🔧 技术栈
@@ -161,6 +167,75 @@ mowen-v1/
 - **go-mcp**: MCP协议实现库
 - **net/http**: HTTP客户端用于API调用
 - **encoding/json**: JSON序列化/反序列化
+- **testify**: 测试框架，提供断言和模拟功能
+
+## 🧪 测试
+
+本项目包含完整的测试套件，确保代码质量和功能正确性。
+
+### 运行测试
+
+**运行所有单元测试**：
+```bash
+go test -v
+```
+
+**生成测试覆盖率报告**：
+```bash
+go test -v -cover -coverprofile=coverage.out
+go tool cover -html=coverage.out -o coverage.html
+```
+
+**运行特定测试套件**：
+```bash
+# 客户端测试
+go test -v -run TestClientTestSuite
+
+# 服务器测试
+go test -v -run TestServerTestSuite
+
+# 类型测试
+go test -v -run TestTypesTestSuite
+
+# 模拟测试
+go test -v -run TestMockTestSuite
+```
+
+### 测试覆盖范围
+
+- **客户端测试** (`client_test.go`)：测试墨问API客户端的所有功能
+  - HTTP请求构建和发送
+  - 响应解析和错误处理
+  - API认证和参数验证
+
+- **服务器测试** (`server_test.go`)：测试MCP服务器的核心功能
+  - MCP协议处理
+  - 工具注册和调用
+  - 错误处理和响应格式
+
+- **类型测试** (`types_test.go`)：测试数据结构转换
+  - JSON序列化/反序列化
+  - 数据验证和格式转换
+  - 边界条件处理
+
+- **模拟测试** (`mock_test.go`)：使用模拟对象进行隔离测试
+  - HTTP客户端模拟
+  - API响应模拟
+  - 错误场景模拟
+
+- **集成测试** (`integration_test.go`)：端到端功能测试
+  - 完整工作流程验证
+  - 并发请求处理
+  - 环境配置测试
+
+**注意**：集成测试需要有效的墨问API密钥，如果没有配置或网络不可达，集成测试可能会失败，但这不影响核心功能的正确性。
+
+### 测试最佳实践
+
+- 所有公共函数都有对应的单元测试
+- 使用表驱动测试处理多种输入场景
+- 模拟外部依赖以确保测试的独立性
+- 测试覆盖率保持在50%以上
 
 ## 📝 使用示例
 
