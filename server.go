@@ -26,9 +26,12 @@ func NewMowenMCPServer() (*MowenMCPServer, error) {
 		return nil, fmt.Errorf("failed to create mowen client: %w", err)
 	}
 
-	// 创建SSE传输服务器
+	// 创建传输服务器
 	//transportServer, err := transport.NewSSEServerTransport("127.0.0.1:8080")
-	transportServer := transport.NewStreamableHTTPServerTransport("127.0.0.1:8080")
+	transportServer := transport.NewStreamableHTTPServerTransport(
+		"127.0.0.1:8080",
+		transport.WithStreamableHTTPServerTransportOptionStateMode(transport.Stateful),
+	)
 
 	// 创建MCP服务器
 	mcpServer, err := server.NewServer(transportServer)

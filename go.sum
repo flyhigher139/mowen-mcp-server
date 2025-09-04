@@ -1,5 +1,5 @@
-github.com/ThinkInAIXYZ/go-mcp v0.2.14 h1:gyZ4Dv47Ozr4k4h329Qk8TOSDr4SsyBJn0o21oAs2Ec=
-github.com/ThinkInAIXYZ/go-mcp v0.2.14/go.mod h1:KnUWUymko7rmOgzvIjxwX0uB9oiJeLF/Q3W9cRt8fVg=
+github.com/ThinkInAIXYZ/go-mcp v0.2.21 h1:bNTjQUDk+aM0CqkduayRXEAGoIWSKFEsQNQ276RLEbc=
+github.com/ThinkInAIXYZ/go-mcp v0.2.21/go.mod h1:KnUWUymko7rmOgzvIjxwX0uB9oiJeLF/Q3W9cRt8fVg=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=

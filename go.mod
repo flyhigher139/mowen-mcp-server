@@ -3,7 +3,7 @@ module github.com/flyhigher139/mowen-mcp-server
 go 1.21
 
 require (
-	github.com/ThinkInAIXYZ/go-mcp v0.2.14
+	github.com/ThinkInAIXYZ/go-mcp v0.2.21
 	github.com/stretchr/testify v1.11.1
 )
 

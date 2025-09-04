@@ -184,7 +184,7 @@ func (c *MowenClient) UploadFile(filePath string, fileType int, fileName string)
 	}
 
 	var prepareResult map[string]interface{}
-	if err := json.Unmarshal(prepareResp, &prepareResult); err != nil {
+	if err = json.Unmarshal(prepareResp, &prepareResult); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal prepare response: %w", err)
 	}
 
