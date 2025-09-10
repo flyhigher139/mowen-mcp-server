@@ -1,5 +1,5 @@
 {
   "go": {
-    "entry": "main.go"
+    "entry": "."
   }
 }
