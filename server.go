@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 
 	"github.com/ThinkInAIXYZ/go-mcp/protocol"
@@ -27,9 +28,15 @@ func NewMowenMCPServer() (*MowenMCPServer, error) {
 	}
 
 	// 创建传输服务器
-	//transportServer, err := transport.NewSSEServerTransport("127.0.0.1:8080")
+	// 获取端口配置，优先使用环境变量PORT，默认为8080
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	
+	// 使用0.0.0.0监听所有网络接口，以支持外部访问
 	transportServer := transport.NewStreamableHTTPServerTransport(
-		"127.0.0.1:8080",
+		"0.0.0.0:"+port,
 		transport.WithStreamableHTTPServerTransportOptionStateMode(transport.Stateful),
 	)
 
